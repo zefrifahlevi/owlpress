@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:owlpress/views/dashboard_screen.dart';
 import 'package:owlpress/views/login_screen.dart';
+import 'package:owlpress/views/register_screen.dart';
 import 'package:owlpress/views/splash_screen.dart';
 
 void main() {
@@ -35,6 +37,8 @@ class OwlPressApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginScreen(),
+        '/register': (context) => const RegisterScreen(),
+        '/dashboard': (context) => const DashboardScreen(), // Tambahan route
       },
     );
   }

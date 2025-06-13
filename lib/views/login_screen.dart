@@ -11,13 +11,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  /*
   void _login() {
-    // Logic login bisa ditambah di sini
     final username = _usernameController.text;
     final password = _passwordController.text;
 
     if (username.isNotEmpty && password.isNotEmpty) {
-      // Auth simulation
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Selamat datang, $username!')),
       );
@@ -28,6 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  */
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(height: 60),
             Center(
               child: Image.asset(
-                'assets/owl_logo_small.png',
+                'assets/images/logo.png',
                 width: 100,
               ),
             ),
@@ -49,13 +49,6 @@ class _LoginScreenState extends State<LoginScreen> {
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: 'Username',
-                labelStyle: TextStyle(color: Color(0xFFD1B97F)),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFD1B97F)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFD1B97F), width: 2),
-                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -65,13 +58,6 @@ class _LoginScreenState extends State<LoginScreen> {
               style: const TextStyle(color: Colors.white),
               decoration: const InputDecoration(
                 labelText: 'Password',
-                labelStyle: TextStyle(color: Color(0xFFD1B97F)),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFD1B97F)),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Color(0xFFD1B97F), width: 2),
-                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -79,15 +65,27 @@ class _LoginScreenState extends State<LoginScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFD1B97F),
               ),
-              onPressed: _login,
+              onPressed: () {
+              // Validasi dulu jika perlu, lalu arahkan ke dashboard
+              Navigator.pushReplacementNamed(context, '/dashboard');
+              },
               child: const Text('MASUK'),
             ),
             const SizedBox(height: 10),
-            const Center(
-              child: Text(
-                'Baru di OwlPress ?\nGabung Sekarang Yuk!',
-                style: TextStyle(color: Colors.blueAccent, fontSize: 12),
-                textAlign: TextAlign.center,
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: const Text(
+                  'Baru di OwlPress ?\nGabung Sekarang Yuk!',
+                  style: TextStyle(
+                    color: Colors.blueAccent,
+                    fontSize: 12,
+                    decoration: TextDecoration.underline,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
             const SizedBox(height: 30),
