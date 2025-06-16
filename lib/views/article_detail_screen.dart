@@ -11,7 +11,7 @@ class ArticleDetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: const [
-            Image(image: AssetImage('assets/images/logo.png')),
+            Image(image: AssetImage('assets/images/logo2.png')),
             SizedBox(height: 16),
             Text(
               'Wabah Monster Krabby Patty!\nDes 1, 1950',
