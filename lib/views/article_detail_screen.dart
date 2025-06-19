@@ -6,12 +6,13 @@ class ArticleDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFDDEFD9),
       appBar: AppBar(title: const Text("Wabah Monster Krabby Patty!")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: const [
-            Image(image: AssetImage('assets/images/logo2.png')),
+            Image(image: AssetImage('images/bikinibottom1.png')),
             SizedBox(height: 16),
             Text(
               'Wabah Monster Krabby Patty!\nDes 1, 1950',

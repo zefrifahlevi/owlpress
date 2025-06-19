@@ -11,6 +11,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFDDEFD9),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.red),
@@ -56,17 +57,17 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 ArticleListItem(
                   title: "Wabah Monster Krabby Patty!",
                   date: "1 Desember 1950",
-                  image: "assets/article1.png",
+                  image: "images/bikinibottom2.png",
                 ),
                 ArticleListItem(
                   title: "Wabah Jamur Gatal!",
                   date: "1 Desember 1950",
-                  image: "assets/article2.png",
+                  image: "images/bikinibottom2.png",
                 ),
                 ArticleListItem(
                   title: "Wabah Bodoh Patrick!",
                   date: "1 Desember 1950",
-                  image: "assets/article3.png",
+                  image: "images/bikinibottom2.png",
                 ),
               ],
             ),

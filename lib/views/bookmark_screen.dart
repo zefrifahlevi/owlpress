@@ -7,6 +7,7 @@ class BookmarkScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFDDEFD9),
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.red),
@@ -21,7 +22,7 @@ class BookmarkScreen extends StatelessWidget {
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: const Color(0xFFDDEFD9),
         elevation: 0,
       ),
       body: Column(
@@ -61,7 +62,7 @@ class BookmarkScreen extends StatelessWidget {
                 ArticleListItem(
                   title: 'Wabah Monster Krabby Patty!',
                   date: '1 Desember 1950',
-                  image: 'assets/article1.png',
+                  image: 'images/bikinibottom2.png',
                 ),
               ],
             ),
