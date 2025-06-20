@@ -1,11 +1,63 @@
 import 'package:flutter/material.dart';
 import 'article_detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String selectedCategory = 'Top';
+
+  final List<String> categories = ['Top', 'World', 'National', 'Tech'];
+
+  final Map<String, List<Map<String, String>>> articlesByCategory = {
+    'Top': [
+      {
+        'title': 'Wabah Monster Krabby Patty!',
+        'date': '1 Desember 1950',
+        'image': 'images/bikinibottom2.png'
+      },
+      {
+        'title': 'Wabah Jamur Gatal!',
+        'date': '1 Desember 1950',
+        'image': 'images/bikinibottom2.png'
+      },
+      {
+        'title': 'Wabah Bodoh Patrick!',
+        'date': '1 Desember 1950',
+        'image': 'images/bikinibottom1.png'
+      },
+    ],
+    'World': [
+      {
+        'title': 'Krisis Bikini Bottom!',
+        'date': '1 Desember 1950',
+        'image': 'images/bikinibottom1.png'
+      },
+    ],
+    'National': [
+      {
+        'title': 'Jamur Menyerang Patrick!',
+        'date': '1 Desember 1950',
+        'image': 'images/bikinibottom2.png'
+      },
+    ],
+    'Tech': [
+      {
+        'title': 'Inovasi Canggih di Krusty Krab!',
+        'date': '1 Desember 1950',
+        'image': 'images/bikinibottom1.png'
+      },
+    ],
+  };
+
+  @override
   Widget build(BuildContext context) {
+    final articles = articlesByCategory[selectedCategory] ?? [];
+
     return Scaffold(
       backgroundColor: const Color(0xFFDDEFD9),
       appBar: AppBar(
@@ -24,20 +76,43 @@ class HomeScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Tab Kategori
+          // TAB KATEGORI
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const [
-              CategoryTab(label: 'Top', isSelected: true),
-              CategoryTab(label: 'World'),
-              CategoryTab(label: 'National'),
-              CategoryTab(label: 'Tech'),
-            ],
+            children: categories.map((cat) {
+              final isSelected = selectedCategory == cat;
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedCategory = cat;
+                  });
+                },
+                child: Column(
+                  children: [
+                    Text(
+                      cat,
+                      style: TextStyle(
+                        color: isSelected ? Colors.black : Colors.grey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (isSelected)
+                      Container(
+                        margin: const EdgeInsets.only(top: 4),
+                        width: 20,
+                        height: 3,
+                        color: Colors.orange,
+                      )
+                  ],
+                ),
+              );
+            }).toList(),
           ),
-          const Divider(),
 
-          // Artikel Unggulan
+          const Divider(),
           const SizedBox(height: 16),
+
+          // ARTIKEL UNGGULAN
           GestureDetector(
             onTap: () {
               Navigator.push(
@@ -61,21 +136,24 @@ class HomeScreen extends StatelessWidget {
                     ),
                     const Positioned.fill(
                       child: Center(
-                        child: Text(
-                          'Bikini Bottom Diserang Virus Siput Gila!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            shadows: [
-                              Shadow(
-                                color: Colors.black,
-                                blurRadius: 2,
-                                offset: Offset(1, 1),
-                              )
-                            ],
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            'Bikini Bottom Diserang Virus Siput Gila!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black,
+                                  blurRadius: 2,
+                                  offset: Offset(1, 1),
+                                )
+                              ],
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
                         ),
                       ),
                     ),
@@ -94,52 +172,15 @@ class HomeScreen extends StatelessWidget {
           ),
 
           const SizedBox(height: 20),
-          const ArticleItem(
-            title: 'Wabah Monster Krabby Patty!',
-            date: '1 Desember 1950',
-            image: 'images/bikinibottom2.png',
-          ),
-          const ArticleItem(
-            title: 'Wabah Jamur Gatal!',
-            date: '1 Desember 1950',
-            image: 'images/bikinibottom2.png',
-          ),
-          const ArticleItem(
-            title: 'Wabah Bodoh Patrick!',
-            date: '1 Desember 1950',
-            image: 'images/bikinibottom2.png',
-          ),
+
+          // ARTIKEL BERDASARKAN KATEGORI
+          ...articles.map((article) => ArticleItem(
+                title: article['title']!,
+                date: article['date']!,
+                image: article['image']!,
+              )),
         ],
       ),
-    );
-  }
-}
-
-class CategoryTab extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-
-  const CategoryTab({super.key, required this.label, this.isSelected = false});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.black : Colors.grey,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        if (isSelected)
-          Container(
-            margin: const EdgeInsets.only(top: 4),
-            width: 20,
-            height: 3,
-            color: Colors.orange,
-          )
-      ],
     );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:owlpress/views/add_article_screen.dart';
+import 'package:owlpress/views/settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -20,6 +22,28 @@ class ProfileScreen extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, color: Colors.red),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SettingScreen(
+                    initialName: 'Kelompok 2',
+                    initialEmail: 'kelompok2@owlpress.org',
+                    initialJoined: 'Desember 1999',
+                    initialInterest: 'Tech, Nasional',
+                    onSave: (name, email, joined, interest) {
+                      // Simpan atau update state
+                      print('Updated profile: $name, $email, $joined, $interest');
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
         backgroundColor: const Color(0xFFDDEFD9),
         elevation: 0,
         centerTitle: true,
@@ -43,22 +67,36 @@ class ProfileScreen extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.person),
               title: const Text('Name'),
-              subtitle: const Text('Endog Lini'),
+              subtitle: const Text('Kelompok 2'),
             ),
             ListTile(
               leading: const Icon(Icons.email),
               title: const Text('Email'),
-              subtitle: const Text('endoglini@owlpress.org'),
+              subtitle: const Text('kelompok2@owlpress.org'),
             ),
             ListTile(
               leading: const Icon(Icons.date_range),
               title: const Text('Joined'),
-              subtitle: const Text('July 1999'),
+              subtitle: const Text('Desember 1999'),
             ),
             ListTile(
               leading: const Icon(Icons.interests),
               title: const Text('Interest'),
-              subtitle: const Text('World, Tech, Entertainment'),
+              subtitle: const Text('Tech, Nasional'),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddArtikelScreen()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Tambah Artikel'),
             ),
           ],
         ),
