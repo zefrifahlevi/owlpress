@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:owlpress/services/api_service.dart';
+import 'package:owlpress/model/user.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -9,30 +11,96 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _rePasswordController = TextEditingController();
 
-  void _register() {
-    final username = _usernameController.text;
-    final newPassword = _newPasswordController.text;
+  final ApiService _apiService = ApiService();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    _rePasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _register() async {
+    final username = _usernameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
     final rePassword = _rePasswordController.text;
 
-    if (username.isNotEmpty && newPassword.isNotEmpty && rePassword.isNotEmpty) {
-      if (newPassword == rePassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrasi berhasil!')),
-        );
-        Navigator.pushReplacementNamed(context, '/login');
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Password tidak cocok!')),
-        );
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Semua field wajib diisi!')),
-      );
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        rePassword.isEmpty) {
+      _showSnackBar('Semua field wajib diisi!');
+      return;
     }
+
+    if (password != rePassword) {
+      _showSnackBar('Password tidak cocok!');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final newUser = User(
+        id: '',
+        createdAt: DateTime.now(),
+        username: username,
+        email: email,
+        password: password,
+        interest: 'General',
+      );
+
+      await _apiService.createUser(newUser);
+
+      _showSnackBar('Registrasi berhasil!');
+      Navigator.pushReplacementNamed(context, '/login');
+    } catch (e) {
+      _showSnackBar(
+        'Registrasi gagal: ${e.toString().replaceFirst('Exception: ', '')}',
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(backgroundColor: Colors.black, content: Text(message)),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    bool isPassword = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: isPassword,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Color(0xFFD1B97F)),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Color(0xFFD1B97F)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Color(0xFFD1B97F)),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.amber),
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
   }
 
   @override
@@ -41,95 +109,60 @@ class _RegisterScreenState extends State<RegisterScreen> {
       backgroundColor: const Color(0xFF1E2D23),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 60),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: ListView(
           children: [
-            // Logo
-            Center(
-              child: Image.asset(
-                'images/logo2.png',
-                height: 120,
-              ),
-            ),
+            Center(child: Image.asset('assets/images/logo2.png', height: 120)),
             const SizedBox(height: 30),
 
-            // Username
-            TextField(
-              controller: _usernameController,
-              style: const TextStyle(color: Color(0xFFD1B97F)),
-              decoration: InputDecoration(
-                labelText: 'Username',
-                labelStyle: const TextStyle(color: Color(0xFFD1B97F)),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFD1B97F)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFD1B97F)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+            _buildTextField(controller: _usernameController, label: 'Username'),
+            const SizedBox(height: 16),
+
+            _buildTextField(
+              controller: _emailController,
+              label: 'Email',
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16),
 
-            // New Password
-            TextField(
-              controller: _newPasswordController,
-              obscureText: true,
-              style: const TextStyle(color: Color(0xFFD1B97F)),
-              decoration: InputDecoration(
-                labelText: 'New Password',
-                labelStyle: const TextStyle(color: Color(0xFFD1B97F)),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFD1B97F)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFD1B97F)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+            _buildTextField(
+              controller: _passwordController,
+              label: 'Password',
+              isPassword: true,
             ),
             const SizedBox(height: 16),
 
-            // Re-Password
-            TextField(
+            _buildTextField(
               controller: _rePasswordController,
-              obscureText: true,
-              style: const TextStyle(color: Color(0xFFD1B97F)),
-              decoration: InputDecoration(
-                labelText: 'Re-Password',
-                labelStyle: const TextStyle(color: Color(0xFFD1B97F)),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFD1B97F)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: const BorderSide(color: Color(0xFFD1B97F)),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
+              label: 'Konfirmasi Password',
+              isPassword: true,
             ),
             const SizedBox(height: 30),
 
-            // Button
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFD1B97F),
-                foregroundColor: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-              ),
-              onPressed: _register,
-              child: const Text(
-                'DAFTAR',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
+            _isLoading
+                ? const Center(
+                  child: CircularProgressIndicator(color: Color(0xFFD1B97F)),
+                )
+                : ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFD1B97F),
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: _register,
+                  child: const Text(
+                    'DAFTAR',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
 
-            const Spacer(),
+            const SizedBox(height: 20),
             const Text(
               'Powered by Kelompok 2',
               style: TextStyle(color: Colors.white60, fontSize: 12),
+              textAlign: TextAlign.center,
             ),
           ],
         ),

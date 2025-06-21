@@ -21,35 +21,88 @@ class SettingScreen extends StatefulWidget {
 }
 
 class _SettingScreenState extends State<SettingScreen> {
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late TextEditingController _joinedController;
-  late TextEditingController _interestController;
+  late Map<String, TextEditingController> _controllers;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.initialName);
-    _emailController = TextEditingController(text: widget.initialEmail);
-    _joinedController = TextEditingController(text: widget.initialJoined);
-    _interestController = TextEditingController(text: widget.initialInterest);
+    _controllers = {
+      'Name': TextEditingController(text: widget.initialName),
+      'Email': TextEditingController(text: widget.initialEmail),
+      'Joined': TextEditingController(text: widget.initialJoined),
+      'Interest': TextEditingController(text: widget.initialInterest),
+    };
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _joinedController.dispose();
-    _interestController.dispose();
+    _controllers.forEach((_, controller) => controller.dispose());
     super.dispose();
+  }
+
+  void _editField(String label) {
+    final controller = _controllers[label]!;
+
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            backgroundColor: const Color(0xFF2A3C30),
+            title: Text(
+              "Edit $label",
+              style: const TextStyle(color: Color(0xFFD1B97F)),
+            ),
+            content: TextField(
+              controller: controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: const Color(0xFF1E2D23),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Color(0xFFD1B97F)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(
+                    color: Color(0xFFE1C78F),
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                labelText: label,
+                labelStyle: const TextStyle(color: Colors.white70),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  "Batal",
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFD1B97F),
+                  foregroundColor: Colors.black,
+                ),
+                onPressed: () {
+                  setState(() {});
+                  Navigator.pop(context);
+                },
+                child: const Text("Simpan"),
+              ),
+            ],
+          ),
+    );
   }
 
   void _saveSettings() {
     widget.onSave(
-      _nameController.text,
-      _emailController.text,
-      _joinedController.text,
-      _interestController.text,
+      _controllers['Name']!.text,
+      _controllers['Email']!.text,
+      _controllers['Joined']!.text,
+      _controllers['Interest']!.text,
     );
     Navigator.pop(context);
   }
@@ -57,48 +110,77 @@ class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFDDEFD9),
+      backgroundColor: const Color(0xFF1E2D23),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.red),
+          icon: const Icon(Icons.arrow_back, color: Color(0xFFD1B97F)),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           "Setting",
-          style: TextStyle(color: Colors.red, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Color(0xFFD1B97F),
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.2,
+          ),
         ),
       ),
-      body: Padding(
+      body: ListView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: "Name"),
-            ),
-            TextField(
-              controller: _emailController,
-              decoration: const InputDecoration(labelText: "Email"),
-            ),
-            TextField(
-              controller: _joinedController,
-              decoration: const InputDecoration(labelText: "Joined"),
-            ),
-            TextField(
-              controller: _interestController,
-              decoration: const InputDecoration(labelText: "Interest"),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
+        children: [
+          ..._controllers.entries.map((entry) {
+            return ListTile(
+              tileColor: const Color(0xFF2A3C30),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 10,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              title: Text(
+                entry.key,
+                style: const TextStyle(color: Colors.white70),
+              ),
+              subtitle: Text(
+                entry.value.text,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.edit, color: Color(0xFFD1B97F)),
+                onPressed: () => _editField(entry.key),
+              ),
+            );
+          }),
+          const SizedBox(height: 20),
+          Center(
+            child: ElevatedButton(
               onPressed: _saveSettings,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-              child: const Text("Simpan"),
-            )
-          ],
-        ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD1B97F),
+                foregroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 14,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text(
+                "SIMPAN",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

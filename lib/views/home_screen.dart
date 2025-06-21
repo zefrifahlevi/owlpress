@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'article_detail_screen.dart';
+import 'package:owlpress/model/article.dart';
+import 'package:owlpress/services/api_service.dart';
+import 'package:owlpress/views/article_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,214 +12,212 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String selectedCategory = 'Top';
+  final ApiService _apiService = ApiService();
+  late Future<List<Article>> _futureArticles;
 
-  final List<String> categories = ['Top', 'World', 'National', 'Tech'];
+  late PageController _pageController;
+  int _currentPage = 0;
+  Timer? _timer;
 
-  final Map<String, List<Map<String, String>>> articlesByCategory = {
-    'Top': [
-      {
-        'title': 'Wabah Monster Krabby Patty!',
-        'date': '1 Desember 1950',
-        'image': 'images/bikinibottom2.png'
-      },
-      {
-        'title': 'Wabah Jamur Gatal!',
-        'date': '1 Desember 1950',
-        'image': 'images/bikinibottom2.png'
-      },
-      {
-        'title': 'Wabah Bodoh Patrick!',
-        'date': '1 Desember 1950',
-        'image': 'images/bikinibottom1.png'
-      },
-    ],
-    'World': [
-      {
-        'title': 'Krisis Bikini Bottom!',
-        'date': '1 Desember 1950',
-        'image': 'images/bikinibottom1.png'
-      },
-    ],
-    'National': [
-      {
-        'title': 'Jamur Menyerang Patrick!',
-        'date': '1 Desember 1950',
-        'image': 'images/bikinibottom2.png'
-      },
-    ],
-    'Tech': [
-      {
-        'title': 'Inovasi Canggih di Krusty Krab!',
-        'date': '1 Desember 1950',
-        'image': 'images/bikinibottom1.png'
-      },
-    ],
-  };
+  @override
+  void initState() {
+    super.initState();
+    _futureArticles = _apiService.getArticles();
+
+    _pageController = PageController(initialPage: 0);
+    _startAutoScroll();
+  }
+
+  void _startAutoScroll() {
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_pageController.hasClients) {
+        _currentPage++;
+        _pageController.animateToPage(
+          _currentPage % 3,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final articles = articlesByCategory[selectedCategory] ?? [];
-
     return Scaffold(
-      backgroundColor: const Color(0xFFDDEFD9),
+      backgroundColor: const Color(0xFF1E2D23),
       appBar: AppBar(
         title: const Text(
-          'News!',
+          'OWL PRESS',
           style: TextStyle(
-            fontSize: 28,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: Color(0xFFD1B97F),
+            letterSpacing: 1.5,
           ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        centerTitle: false,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // TAB KATEGORI
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: categories.map((cat) {
-              final isSelected = selectedCategory == cat;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    selectedCategory = cat;
-                  });
-                },
-                child: Column(
-                  children: [
-                    Text(
-                      cat,
-                      style: TextStyle(
-                        color: isSelected ? Colors.black : Colors.grey,
-                        fontWeight: FontWeight.bold,
+      body: FutureBuilder<List<Article>>(
+        future: _futureArticles,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFFD1B97F)),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Gagal load artikel: ${snapshot.error}',
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text(
+                'Tidak ada artikel ditemukan.',
+                style: TextStyle(color: Colors.white70),
+              ),
+            );
+          }
+
+          final articles = snapshot.data!;
+          final headlineArticles = articles.take(3).toList();
+
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              // AUTO-SCROLL HEADLINE SLIDER
+              SizedBox(
+                height: 220,
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: headlineArticles.length,
+                  itemBuilder: (context, index) {
+                    final article = headlineArticles[index];
+                    return Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        image: DecorationImage(
+                          image:
+                              article.imageUrl.isNotEmpty
+                                  ? NetworkImage(article.imageUrl)
+                                  : const AssetImage('images/default.png')
+                                      as ImageProvider,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
-                    if (isSelected)
-                      Container(
-                        margin: const EdgeInsets.only(top: 4),
-                        width: 20,
-                        height: 3,
-                        color: Colors.orange,
-                      )
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-
-          const Divider(),
-          const SizedBox(height: 16),
-
-          // ARTIKEL UNGGULAN
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const ArticleDetailScreen()),
-              );
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.asset('images/bikinibottom1.png'),
-                    ),
-                    Positioned.fill(
                       child: Container(
-                        color: Colors.black.withOpacity(0.4),
-                      ),
-                    ),
-                    const Positioned.fill(
-                      child: Center(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withOpacity(0.6),
+                              Colors.transparent,
+                            ],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(16),
+                        child: Align(
+                          alignment: Alignment.bottomLeft,
                           child: Text(
-                            'Bikini Bottom Diserang Virus Siput Gila!',
-                            style: TextStyle(
+                            article.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               shadows: [
                                 Shadow(
+                                  blurRadius: 4,
                                   color: Colors.black,
-                                  blurRadius: 2,
-                                  offset: Offset(1, 1),
-                                )
+                                  offset: Offset(0, 2),
+                                ),
                               ],
                             ),
-                            textAlign: TextAlign.center,
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Headline of The Featured Article!',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+              ),
+              const SizedBox(height: 24),
+
+              // LIST OF OTHER ARTICLES
+              ...articles.map((article) {
+                return Card(
+                  color: const Color(0xFF2A3C30),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                )
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // ARTIKEL BERDASARKAN KATEGORI
-          ...articles.map((article) => ArticleItem(
-                title: article['title']!,
-                date: article['date']!,
-                image: article['image']!,
-              )),
-        ],
-      ),
-    );
-  }
-}
-
-class ArticleItem extends StatelessWidget {
-  final String title;
-  final String date;
-  final String image;
-
-  const ArticleItem({
-    super.key,
-    required this.title,
-    required this.date,
-    required this.image,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(vertical: 8),
-      leading: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.asset(image, width: 50, height: 50, fit: BoxFit.cover),
-      ),
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(date, style: const TextStyle(fontSize: 12)),
-          const Text(
-            'Lorem Ipsum dolor sit amet, consectetur adipiscing elit.',
-            style: TextStyle(fontSize: 12),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+                  margin: const EdgeInsets.only(bottom: 16),
+                  elevation: 4,
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(12),
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child:
+                          article.imageUrl.isNotEmpty
+                              ? Image.network(
+                                article.imageUrl,
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.cover,
+                                errorBuilder:
+                                    (context, error, stackTrace) => Image.asset(
+                                      'images/default.png',
+                                      width: 60,
+                                      height: 60,
+                                    ),
+                              )
+                              : Image.asset(
+                                'images/default.png',
+                                width: 60,
+                                height: 60,
+                              ),
+                    ),
+                    title: Text(
+                      article.title,
+                      style: const TextStyle(
+                        color: Color(0xFFD1B97F),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    subtitle: Text(
+                      article.author,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) =>
+                                  ArticleDetailScreen(article: article),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+            ],
+          );
+        },
       ),
     );
   }

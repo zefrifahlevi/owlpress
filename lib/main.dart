@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart'; // tambahkan ini
 import 'package:owlpress/views/dashboard_screen.dart';
 import 'package:owlpress/views/login_screen.dart';
 import 'package:owlpress/views/register_screen.dart';
 import 'package:owlpress/views/splash_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // <== WAJIB ADA
+  await dotenv.load(fileName: ".env");
   runApp(const OwlPressApp());
 }
 
@@ -29,9 +32,7 @@ class OwlPressApp extends StatelessWidget {
             borderSide: BorderSide(color: Color(0xFFD1B97F), width: 2),
           ),
         ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.white),
-        ),
+        textTheme: const TextTheme(bodyMedium: TextStyle(color: Colors.white)),
       ),
       initialRoute: '/',
       routes: {
