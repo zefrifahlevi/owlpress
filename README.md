@@ -21,7 +21,7 @@ Desain UI/UX Prototype `https://www.figma.com/design/nyxgZrAEsDoBO9HSaD3RcQ/Prak
 5. Setelah itu anda bisa melakukan Run Project Flutter ini
 
 
-- Membuat File .env
+- Membuat File .env <br/>
 ![Membuat File .env](images/env.png)
 
 - Memasukan API ke dalam file .env
